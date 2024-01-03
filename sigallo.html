@@ -1,0 +1,221 @@
+<!DOCTYPE HTML>
+<!--
+	Spectral by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Ginn Sato</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Ginn Sato</a></h1>
+						<nav id="nav">
+							<ul>
+								<li class="special">
+									<a href="#menu" class="menuToggle"><span>Menu</span></a>
+									<div id="menu">
+										<ul>
+											<li><a href="index.html">Home</a></li>
+											<li><a href="resumetranscript.html">Resume and Transcript</a></li>
+											<li><a href="projects.html">Projects</a></li>
+											<li><a href="generic.html">Generic</a></li>
+											<li><a href="elements.html">Elements</a></li>
+										</ul>
+									</div>
+								</li>
+							</ul>
+						</nav>
+					</header>
+
+				<!-- Main -->
+					<article id="main">
+						<header>
+							<h2>Signal Allocation</h2>
+							<p>A full description of my approach to solve this problem.</p>
+						</header>
+						<section class="wrapper style5">
+							<div class="inner">
+
+								<h3>Intro</h3>
+								<p> In the following write-up, I delve into the python based algorithm I've developed to address the signal allocation problem. Given a set of radio towers with a certain radius of coverage, this algorithm must ensure that overlapping towers each have different signals so that there is no interference between radio signals. The real world applications of this algorithm are very relevant and the need to perform this analysis may be crucial for real time operating systems. 
+                                </p>
+                                
+                                <h3>The Setup</h3>
+								<p>To begin I developed the<code>Tower</code>class which has 4 attributes. A<code>tower_id</code>which is a unique identifier for each tower, a <code>position</code>which is a tuple containing the coordinates of our tower, <code>power</code> which represents the radius of our tower signal, and <code>signal</code>which holds the value of the signal which is just an integer. From this basic class, I then developed the<code>Towers</code>class which holds a list of all Tower objects in an attribute<code>towers</code>. The instantiation of this class can either randomly generate towers or generate them using a specific formatted input parameter. The initiation runs in <em>O(n)</em> time where <em>n</em> represents the number of towers. We then defined several useful methods including <code>add_tower()</code>and<code>remove_tower()</code>which are straightforward. It gets a bit more interesting with<code>get_overlapping_towers(tower)</code>which gets all towers that overlap with the input tower. This has a TC of <em>O(n)</em>. The <code>get_overlaps()</code> function also takes advantage of this function by calling it on each tower and then adding those overlaps to a list of complete overlaps which has a TC of <em>O(n<sup>2</sup>)</em>. The full list of methods with their respective time complexity and auxiliary space complexity is shown in the table below.</p>
+									<div class="table-wrapper">
+										<table class="alt">
+											<thead>
+												<tr>
+													<th>Method Name</th>
+													<th>Time Complexity</th>
+													<th>Space Complexity</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><font size="5"><code>init</code></font></td>
+													<td>O(n)</td>
+													<td>O(n)</td>
+												</tr>
+												<tr>
+													<td><font size="5"><code>add_tower</code></font></td>
+													<td>O(n)</td>
+													<td>O(1)</td>
+												</tr>
+												<tr>
+													<td><font size="5"><code>remove_tower</code></font></td>
+													<td>O(n)</td>
+													<td>O(1)</td>
+												</tr>
+												<tr>
+													<td><font size="5"><code>get_overlaps</code></font></td>
+													<td>O(n<sup>2</sup>)</td>
+													<td>O(n<sup>2</sup>)</td>
+												</tr>
+												<tr>
+													<td><font size="5"><code>get_overlapping_towers</code></font></td>
+													<td>O(n)</td>
+													<td>O(n)</td>
+												</tr>
+                                                <tr>
+													<td><font size="5"><code>get_towers</code></font></td>
+													<td>O(1)</td>
+													<td>O(1)</td>
+												</tr>
+                                                <tr>
+													<td><font size="5"><code>get_num_towers</code></font></td>
+													<td>O(1)</td>
+													<td>O(1)</td>
+												</tr>
+                                                <tr>
+													<td><font size="5"><code>visualize_towers</code></font></td>
+													<td>O(n)</td>
+													<td>O(n)</td>
+												</tr>
+											</tbody>
+
+										</table>
+									</div>
+								
+
+								<h4>The Algorithm</h4>
+
+								<p>Now that we have the right tools to use for our actual signal allocation problem we can dive into the meat of the algorithm. I created a <code>SignalAllocation</code> class that first initializes a towers class using the given input parameters. Additionally, this instantiation defines a <code>max_allowed_radio_signals</code>which is a limit to the number of signals we have available to us in order to solve our algorithm. The last notable aspect of the initiation is that if the number of towers is greater than 970, we change the maximum allowable recursion depth of our system to whatever the number of towers is plus 30. Since my algorithm uses recursion to solve the signal allocation problem and the default recursion depth is 1000, I wanted to ensure that the algorithm would work for tower numbers greater than 1000. The 970 comes from the fact that there seems to be roughly 30 additional recursive calls before we even get to the algorithm. This may vary depending on the way the functions are called or tested.</p>
+                                
+                                <p>My approach to this signal allocation problem was to essentially transform my tower layout into a list of graphs where each disjoint set of overlapping towers is a graph. Each tower of that graph is a node and overlapping towers would be connected with an edge. Once this data transformation has been applied, we just need to solve the graph coloring problem or M-coloring problem in which no two adjacent nodes have the same color or in our case the same signal. The <code>create_mapping()</code> method is the one called to solve the signal allocation problem but it takes advantage of several helper functions that should be explained first. </p>
+
+                                <p><span class="image left"><img src="images/sigallo01.png" alt="" style="border:1px solid #808080;"/></span>The first of these helper functions is the <code>get_towers_as_graph()</code> method which essentially iterates through each tower in the tower list and performs a BFS on the unexplored towers using that tower as the root node. Through this BFS we are able to construct a graph where the nodes are towers and the edges of each node are the towers that overlap with it. Once the BFS is done we check the next tower to see if it has been visited or not. The point of this is to account for the case of having two or more disjoint sets of overlapping towers. So if a tower has not been visited, it must be part of a new graph so we perform another BFS with that tower as the root node. These disjoint graphs are then added to a list of graphs and set equal to the class attribute <code>graph_list</code>. In the figure to the left we can see the tower layout with each tower number and signal in each circle. Below we have the <code>graph_list</code> generated using a list of python ditionaries where each node is represented by the tower id. Note that in the actual graph implementation these dictionary keys and elements are the Tower objects themselves, but I converted them into their keys for demonstration purposes.</p>
+
+                                <p><b>Graph List Generated:</b><br /><code>[{0: [2, 9], 2: [0, 3, 6, 9], 9: [0, 2], 3: [2, 6], 6: [2, 3]}, {1: [8], 8: [1]}, {4: [7], 7: [4]}, {5: []}]</code> <br /></p>
+                                
+                                <p>We have four separate dictionaries which makes sense since we have four disjoint sets of towers shown above. We can see that for the first dictionary, node 0 has edges to 2 and 9 and it indeed overlaps with both 2 and 9. Looking at the next entry in the dictionary, 2 overlaps with 0, 3, 6 and 9 which matches up with the image. The same goes for the rest of the dctionary. The next two dictionaries both have two entries where each tower overlaps with the other. They are disjoint from eachother and therefore have their own dictionary. The final dictionary is the lone tower 5 which is a single entry with no edges. The results match exactly what we expect. </p>
+
+                                <p><span class="image right"><img src="images/sigallo02.jpeg" alt="" style="border:1px solid #808080;"/></span>Once we have our <code>graph_list</code> attribute set, we iterate through each graph and call the <code>create_mapping_helper</code> method which is the recursive part. To save memory in each call I pass in three parameters: <em>(1)</em> <code>graph_index</code> which is an integer used to index into the <code>graph_list</code> attribute, <em>(2)</em> <code>tower</code> which is the tower object we are checking, and <em>(3)</em> <code>tower_index</code> which is the index into the graph after converting the graph into a list of keys. Since the towers are ordered in the graph in the same order they are found, we know that the adjacent keys in the graph list overlap so we can iterate to the next tower index. The base case of this function checks if our <code>tower_index</code> is at the end of the graph list and if so we iterate through the different available signals and call our last helper function, <code>is_valid_signal</code> which essentially just checks if any of the adjacent/overlapping towers have the same signal as the input tower and returns either True or False. From this base case we either return True and continue or False and try a different signal. If at any point the recursive function return is False which happens when no signals are valid, we reset the tower’s signal to 0 and try again. If none of the signals work at that level we recurse back up to the previous level. This is known as back-tracking. A simple example of this algorithm is shown above where we start at (1) and try setup (2) but see that we can’t have two reds next to each other, so we move over to (3). This is a valid layout so we would call our helper function again and try the red signal first in which case its invalid and then we try the blue and it works. Back-tracking is not specifically shown in this example but would be in more complex graphs where we are at a very low depth and must backtrack all the way up until a valid solution is found. The time and auxilary space complexity of this class is shown below for each class method.</p>
+							
+                                <div class="table-wrapper">
+                                    <table class="alt">
+                                        <thead>
+                                            <tr>
+                                                <th>Method Name</th>
+                                                <th>Time Complexity</th>
+                                                <th>Space Complexity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><font size="5"><code>init</code></font></td>
+                                                <td>O(n)</td>
+                                                <td>O(n)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>get_towers_as_graph</code></font></td>
+                                                <td>O(n<sup>2</sup>)</td>
+                                                <td>O(n<sup>2</sup>)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>is_valid_signal</code></font></td>
+                                                <td>O(n)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>create_mapping_helper</code></font></td>
+                                                <td>O(s*n<sup>2</sup>)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>create_mapping</code></font></td>
+                                                <td>O(s*n<sup>2</sup>)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>get_towers</code></font></td>
+                                                <td>O(1)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>get_num_radio_signals</code></font></td>
+                                                <td>O(n)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><font size="5"><code>is_valid</code></font></td>
+                                                <td>O(n<sup>2</sup>)</td>
+                                                <td>O(1)</td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                                <p>The <code>get_towers_as_graph</code> function is <em>O(n<sup>2</sup>)</em> since at worst case every tower overlaps with every other tower therefore making the BFS search <em>O(n<sup>2</sup>)</em> and then every tower would have already been visited so the outside loop would be <em>O(1)</em>. Creating this graph list would also use <em>O(n<sup>2</sup>)</em> auxiliary space since for every <em>n</em> towers there would be <em>n</em> entries into their list of adjacencies. The <code>create_mapping_helper></code> function is <em>O(s*n<sup>2</sup>)</em> where <em>n</em> is the number of towers and <em>s</em> is the max number of signals. This is because we iterate through <em>s</em> signals, then check for <em>n</em> overlapping towers and recurse at least <em>n</em> times. The <code>create_mapping</code> function would then be <em>O(n<sup>2</sup>)</em> for the <code>get_towers_as_graph</code> + <em>O(s*n<sup>2</sup>)</em> for the helper so we have <em>O(s*n<sup>2</sup>)</em>. </p>
+                            
+                                <h3>In Conclusion</h3>
+                                <p>This algorithm is relatively efficient but can run into trouble with very large data sets. If there are large disjoint sets of towers, parallelization could be used very effectively to solve this problem. My approach to solve the signal allocation problem was to construct the data in a smart way that can effectively solve a more common issue known as the graph-coloring problem. This algorithm has many applications like solving sudoku puzzles, scheduling of taxis and even register allocation in compilers. I hope this write-up was able to give you some insight on my approach to this problem. </p>
+                                <div class="actions">
+                                    <ul class="actions stacked">
+                                        <li><a href="projects.html" class="button primary fit">Return to projects</a></li>
+                                    </ul>
+                                </div>
+                            
+                            </div>
+						</section>
+					</article>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+							<li><a href="#" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+						<ul class="copyright">
+							<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+						</ul>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
