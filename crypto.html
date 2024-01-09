@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+<!--
+	Spectral by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Ginn Sato</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Ginn Sato</a></h1>
+						<nav id="nav">
+							<ul>
+								<li class="special">
+									<a href="#menu" class="menuToggle"><span>Menu</span></a>
+									<div id="menu">
+										<ul>
+											<li><a href="index.html">Home</a></li>
+											<li><a href="resumetranscript.html">Resume and Transcript</a></li>
+											<li><a href="projects.html">Projects</a></li>
+											<li><a href="generic.html">Generic</a></li>
+											<li><a href="elements.html">Elements</a></li>
+										</ul>
+									</div>
+								</li>
+							</ul>
+						</nav>
+					</header>
+
+				<!-- Main -->
+					<article id="main">
+						<header>
+							<h2>Cryptocurrency</h2>
+							<p>Implementation details of my toy cryptocurrency and example.</p>
+						</header>
+						<section class="wrapper style5">
+							<div class="inner">
+
+								<h3>Overview</h3>
+								<p>For this project, we implemented a simple blockchain that allows users to transfer a currency back and forth. The blockchain is essentially a linked list that contains different blocks. Each block has its own hash value, the hash value of the previous block in the blockchain, a vector of transactions, a timestamp, and a value nonce used in the calculation of its hashcode.
+									Each transaction contains three fields, the sender, recipient, and amount transfered. The main purpose of each block is to hold the information of these transactions.</p>
+								
+								<p>The blockchain also contains its own vector of pending transactions located outside of individual blocks. This list of pending transactions grows until the process of mining occurs. The purpose of mining is to package the list of pending transactions into a block and insert this block into the blockchain. This process is computationally complex in order to more intensely secure our blockchain. We implemented a <code>mineBlock()</code> function that alters the value of nonce until we receive a hashcode that contains the number of difficulty leading 0s. For example, if difficulty = 4, then our <code>mineBlock()</code> function would find the nonce value that allows the hashcode to have 4 leading zeros. This works because we concatenate our nonce value with the other values of our block and pass it into the SHA256 function to receive a hash code. The computaional cost increases exponentially as we increase the difficulty. Using a difficulty of 4 works in a few milliseconds, but increassing this difficulty to 8 can take minutes to mine the block.</p>
+
+
+								<p>An example of a singular block is shown below. We can see that in this example the difficulty = 4 since we have 4 leading zeros for each hash value. The value nonce that allowed such a hash is 7707. We can also see a singular transaction that this block holds.</p>
+								<div class="col-6"><span class="image fit"><img src="images/crypto/example01.png" alt="" /></span></div>
+
+								<p>To mine these blocks, a user must call the <code>minePendingTransaction(string minerAddress)</code> function. This function instantiates a new block with the list of transactions equal to the list of pending transactions. It then mines this block, clears the list of pending transactions, and adds it to the blockchain. The reward of doing such a task is to add a new pending transaction sent by "BFC" to the <code>minerAddress</code> passed into the function in the amount of <code>miningReward</code>. In the image above, the transaction to "Ginn" was due to this mining action.</p>
+
+								<p>To successfully add a transaction to the list of pending transactions, we need to ensure that our sender address has enough funds to even make the transaction in the first place. It would be unrealistic to allow users to send money they do not have. We have an <code>addTransaction(string src, string dst, int coin)</code> function that will first check if the <code>src</code> has enough coins by calling <code>getBalanceofAddress(string address)</code> with the address of src. One reason why the blockchain is so secure is that we do not store the value of any given address in a single place in the blockchain, rather the information leading to the total value is scattered throughout the blockchain's various transactions. Thus in order to determine if the given address has enough coins, we iterate through the blockchain, then iterate through the individual block's transactions and search for transactions that contain the given address as either the sender or recipient. If the address is the recipient then we increase their total and likewise, if the address is the sender we decrease their total. It is important to note that we must also iterate through the list of pending transactions to ensure that our sender does not try to send more money than they have. If at any point the value becomes negative, which it should not, we shall return an error and return -1. Otherwise, the total of the address's net value is returned. Our <code>addTransaction()</code> function will ensure that the value of the src is greater than or equal to the desired amount being sent. If it is, we can add this transaction to the vector of pending transactions, otherwise, we do not add it and report that the sender has insufficient funds, much like a debit card machine at the grocery store.</p>
+								
+								<p>We also have a function <code>isChainValid()</code> that ensures our chain is valid by checking the previous hash values of each block, and ensuring that the difficulty level of each block (except the first) is maintained throughout the blockchain.
+
+									Another useful function we implemented is the <code>prettyPrint()</code>. This function prints the different blocks located in the chain and all their content in a neat manner that represents a linked list of blocks. Where each previous block points to its next block. This function is useful for gathering information about the functionality of our blockchain.</p>
+								
+								<p>Users can create their own main function to interact with the blockchain. When you call the blockchain constructor, you create one sample block that contains useless transaction information. Then, when an address mines a block by calling <code>minePendingTransactions()</code>, it creates a new block, mines it, and then rewards this address with 10 units of currency which will not be received until the next block is mined since this reward transaction is added to the list of pending transactions.
+
+									Once addresses have been rewarded currency by mining blocks, they can transfer this currency amongst each other by <code>addTransaction()</code> and users of the program can keep track of the blockchain with <code>prettyPrint()</code>.</p>
+
+								<p>We implemented a simple main function that allows users to interact with the blockchain. You can add transactions, mine blocks, and check if the chain is valid. Each iteration will print out the blockchain for the user to view.</p>
+
+
+								<h4>Example</h4>
+
+								<p>Below is the first prompt given to the user in the terminal upon entering the command <code>./run_app_1</code></p>
+								<div class="col-6"><span class="image fit"><img src="images/crypto/example02.png" alt="" /></span></div>
+								<p>From this menu, the user has a few different options. Entering a <b>1</b> will add a transaction, prompting the user to enter a sender, receiver, and amount to transfer. This action also ensures that the sender has enough funds to deliver to that address in the first place. Option <b>2</b> will simple run the <code>isChainValid()</code> function to ensure that our blockchain is still valid. Option <b>3</b> will prompt the user to enter the address that mines the block, then mine the block adding the list of pending transactions to the new blocks transactions vector. Option <b>4</b> quits the program.</p>
+								
+								<p> Initially, address "Ginn" will mine the block which is shown on the left. The transaction which rewards "Ginn" with 10 units is added to the list of pending transactions and not yet shown in the block chain. Following this, we send 4 units from "Ginn" to "Joe". Even though Ginn's balance is not yet shown in the block chain, we know that he has enough of a balance to send that amount since we iterate through the list of pending transactions as well. This transaction is also added to the list of pending transactions.</p>
+								<div class="box alt">
+									<div class="row gtr-50 gtr-uniform">
+										<div class="col-6"><span class="image fit"><img src="images/crypto/example03.png" alt="" /></span></div>
+										<div class="col-6"><span class="image fit"><img src="images/crypto/example04.png" alt="" /></span></div>
+									</div>
+								</div>
+
+
+								<p>Now we will mine the current block which will contain the transactions that occurred above. The miner in this case will be a third user "Billy". This interaction and the full block chain is shown below.</p>
+
+								<div class="col-6"><span class="image fit"><img src="images/crypto/example05.png" alt="" /></span></div>
+
+
+								<p>The user can continue to add transactions and mine blocks all while ensuring that the address's balance never goes below zero. Another example of adding a few more transactions is shown below.</p>
+							
+								<div class="col-6"><span class="image fit"><img src="images/crypto/example06.png" alt="" /></span></div>
+
+
+								<p>Here is what happens when we try to send more money than is available for a user.</p>
+
+								<div class="col-6"><span class="image fit"><img src="images/crypto/example07.png" alt="" /></span></div>
+
+								<p>This simple toy cryptocurrency is meant to serve as an introduction to the blockchain and how actual cryptocurrencys take advantage of it. In the real world it is actually very computationally expensive to mine blocks. Using bitcoin as an example, if a user is able to successfully mine a block they will receieve 6.25 Bitcoins as a reward which as of now is worth roughly $227,500!</p>
+							
+								<div class="actions">
+                                    <ul class="actions stacked">
+                                        <li><a href="projects.html" class="button primary fit">Return to projects</a></li>
+                                    </ul>
+                                </div>
+							</div>
+						</section>
+					</article>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+							<li><a href="#" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+						<ul class="copyright">
+							<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+						</ul>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
